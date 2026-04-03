@@ -12,7 +12,7 @@ export default function Providers({
       domain= "dev-ep8r40shb6pgjqcd.us.auth0.com"
       clientId="JsdHVvywTjhUGctkQ7FmXVGfkOLLnrzl"
       authorizationParams={{
-        redirect_uri: "http://localhost:3000",
+        redirect_uri: "http://localhost:3000/auth-test",
       }}
     >
       {children}
