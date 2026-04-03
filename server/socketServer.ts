@@ -6,6 +6,8 @@ import {
   voteSkip,
   updateSong,
 } from "../lib/roomManager"
+import { skipSong } from "../lib/spotify"
+import { SPOTIFY_TOKEN } from "../lib/spotifyToken"
 
 const httpServer = createServer()
 
@@ -28,18 +30,22 @@ io.on("connection", (socket) => {
     try {
       const room = joinRoom(roomId, socket.id)
       socket.join(roomId)
+      socket.emit("joined-room", room) 
       io.to(roomId).emit("room-update", room)
-    } catch {
+    } 
+    
+    catch {
       socket.emit("error", "Room not found")
     }
   })
 
-  socket.on("vote-skip", ({ roomId }) => {
+  socket.on("vote-skip", async ({ roomId }) => {
     const result = voteSkip(roomId)
 
     io.to(roomId).emit("vote-update", result)
 
     if (result.shouldSkip) {
+      await skipSong(SPOTIFY_TOKEN)
       io.to(roomId).emit("skip-song")
     }
   })
