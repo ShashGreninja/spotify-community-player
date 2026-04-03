@@ -61,5 +61,5 @@ io.on("connection", (socket) => {
 })
 
 httpServer.listen(4000, () => {
-  console.log("🔥 Socket server running on http://localhost:4000")
+  console.log("Socket server running on http://localhost:4000")
 })
