@@ -7,7 +7,7 @@ import {
   updateSong,
 } from "../lib/roomManager"
 import { skipSong } from "../lib/spotify"
-import { SPOTIFY_TOKEN } from "../lib/spotifyToken"
+import { getSpotifyToken } from "../server/lib/getSpotifyToken"
 
 const httpServer = createServer()
 
@@ -30,22 +30,32 @@ io.on("connection", (socket) => {
     try {
       const room = joinRoom(roomId, socket.id)
       socket.join(roomId)
-      socket.emit("joined-room", room) 
+      socket.emit("joined-room", room)
       io.to(roomId).emit("room-update", room)
-    } 
-    
+    }
+
     catch {
       socket.emit("error", "Room not found")
     }
   })
 
-  socket.on("vote-skip", async ({ roomId }) => {
+  socket.on("vote-skip", async ({ roomId, userId }) => {
     const result = voteSkip(roomId)
 
     io.to(roomId).emit("vote-update", result)
 
     if (result.shouldSkip) {
-      await skipSong(SPOTIFY_TOKEN)
+      const token = await getSpotifyToken(userId)
+
+      if (!token) {
+        console.log("No Spotify token found")
+        return
+      }
+
+      console.log("Using Spotify token from Auth0")
+
+      await skipSong(token)
+
       io.to(roomId).emit("skip-song")
     }
   })
